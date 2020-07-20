@@ -26,9 +26,17 @@ public class WebsocketClientEndpoint extends Endpoint {
             public void onMessage(String message) {
                 System.out.println("Received: " + message);
                 string = message;
+                System.out.println(string);
             }
         });
     }
+
+//    @OnMessage
+//    public void onMessage(String message) {
+//        String text = new StringReader(message).read().
+//        System.out.println(Json.creat);
+//    }
+
 
     public void connect() throws DeploymentException, IOException, URISyntaxException {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -38,18 +46,24 @@ public class WebsocketClientEndpoint extends Endpoint {
                 .build();
 
         container.connectToServer(this, config, new URI(url));
-        System.out.println("Connected");
+        System.out.println("Connected In WS");
     }
 
     public WebsocketClientEndpoint(String url) {
         super();
         this.url = url;
     }
+
+    public void sendMessage(Object object) {
+        session.getAsyncRemote().sendObject(object);
+    }
+
     public void sendObject(Object object){
         session.getAsyncRemote().sendObject(object);
     }
 
     public int getValue(){
-        return Integer.parseInt(string);
+        int number = Integer.parseInt(string);
+        return number;
     }
 }
