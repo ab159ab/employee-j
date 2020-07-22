@@ -17,6 +17,7 @@ public class WebsocketClientEndpoint extends Endpoint {
     Session session;
     String url;
     public static String msg;
+    Main main;
 
 
     @Override
@@ -27,12 +28,17 @@ public class WebsocketClientEndpoint extends Endpoint {
             public void onMessage(String message) {
                 System.out.println("Received: " + message);
                WebsocketClientEndpoint.msg = message;
-//               setValue(message);
             }
+            public void sendObj(){
+
+
+
+            }
+
         });
     }
 
-    public void connect() throws DeploymentException, IOException, URISyntaxException {
+    public int connect() throws DeploymentException, IOException, URISyntaxException {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 
         ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
@@ -41,6 +47,7 @@ public class WebsocketClientEndpoint extends Endpoint {
 
         container.connectToServer(this, config, new URI(url));
         System.out.println("Connected In WS");
+        return 12;
     }
 
     public WebsocketClientEndpoint(String url) {
@@ -48,17 +55,16 @@ public class WebsocketClientEndpoint extends Endpoint {
         this.url = url;
     }
 
-    public void sendMessage(Object object) {
-        session.getAsyncRemote().sendObject(object);
+    public void sendMessage(String object) throws IOException {
+        session.getBasicRemote().sendText(object);
     }
 
-    public void sendObject(Object object){
-        session.getAsyncRemote().sendObject(object);
+    public void sendObject(String object){
+        session.getAsyncRemote().sendText(object);
     }
 
     public int getValue(){
         System.out.println("GotValue: " + msg);
-//        numberedMessage = Integer.parseInt(string);
         return 2000;
     }
 
@@ -66,7 +72,6 @@ public class WebsocketClientEndpoint extends Endpoint {
 //        WebsocketClientEndpoint.msg =
         this.msg = s;
         System.out.println(s);
-//        return s;
     }
     public static void main(String[] args) {
         launch(args);
