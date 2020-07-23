@@ -4,22 +4,13 @@ package sample;
 import javax.websocket.*;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.*;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-
 import static javafx.application.Application.launch;
 
-
 public class WebsocketClientEndpoint extends Endpoint {
-
     Session session;
     String url;
-    public static String msg;
     Main main;
-
-
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         this.session = session;
@@ -27,51 +18,41 @@ public class WebsocketClientEndpoint extends Endpoint {
             @Override
             public void onMessage(String message) {
                 System.out.println("Received: " + message);
-               WebsocketClientEndpoint.msg = message;
+                if (!message.equals("404")){
+                    main = new Main();
+                    String image = main.captureScreens();
+                    if (image==image){
+
+                    }
+                    String name =  Main.text;
+                    Controller controller = new Controller(name,image);
+                    String object = controller.toJson();
+                    sendObject(object);
+                }
             }
-            public void sendObj(){
-
-
-
-            }
-
         });
     }
-
-    public int connect() throws DeploymentException, IOException, URISyntaxException {
+    public void connect() throws DeploymentException, IOException, URISyntaxException {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-
         ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
                 .configurator(new Configurator())
                 .build();
-
         container.connectToServer(this, config, new URI(url));
-        System.out.println("Connected In WS");
-        return 12;
     }
-
     public WebsocketClientEndpoint(String url) {
         super();
         this.url = url;
     }
-
-    public void sendMessage(String object) throws IOException {
-        session.getBasicRemote().sendText(object);
-    }
-
     public void sendObject(String object){
-        session.getAsyncRemote().sendText(object);
+        session.getAsyncRemote().sendObject(object);
+        System.out.println("Object Sent");
     }
-
-    public int getValue(){
-        System.out.println("GotValue: " + msg);
-        return 2000;
-    }
-
-    public void setValue(String s){
-//        WebsocketClientEndpoint.msg =
-        this.msg = s;
-        System.out.println(s);
+    public void cancel(){
+        try{
+            session.close();
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
     public static void main(String[] args) {
         launch(args);
