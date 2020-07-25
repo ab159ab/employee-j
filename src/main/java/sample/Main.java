@@ -2,9 +2,11 @@ package sample;
 
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import java.awt.AWTException;
@@ -17,6 +19,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.Timer;
+import java.util.TimerTask;
 import javax.imageio.ImageIO;
 
 
@@ -27,9 +30,11 @@ public class Main extends Application {
     TextField textField;
     static String text = "A";
     static BufferedImage screenFullImage;
-    static ByteBuffer byteBuffer;
-    Timer timer;
     static String image;
+
+    Timer timer;
+    int count = 0;
+    int temp = 0;
     WebsocketClientEndpoint handler = new WebsocketClientEndpoint("ws://localhost:8080/echo");
 
     @Override
@@ -55,10 +60,51 @@ public class Main extends Application {
         layout.setTop(textField);
 
 
+
+
+
+
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                if(count != 0){
+                    System.out.println("Count Reset");
+                    count = 0;
+                }
+            }
+        });
+        scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                if (temp == 1){
+                    timer.cancel();
+                }
+                timer = new Timer();
+                temp = 1;
+                timer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (count >= 60){
+                            timer.cancel();
+                            count = 0;
+                            temp = 0;
+                            handler.cancel();
+                            System.out.println("Inactive Time Exceeded");
+                        }
+                        else {
+                            count ++;
+                            System.out.println("Total Counts: " + count);
+                        }
+                    }
+                },0,1000);
+
+            }
+        });
+
+
         primaryStage.setTitle("Desktop Client");
         primaryStage.setScene(scene);
         primaryStage.show();
-
     }
 
     public String captureScreens() {
@@ -98,6 +144,7 @@ public class Main extends Application {
 
 //    public void sendImages(long number) {
 //        try{
+//            Timer timer;
 //            timer = new Timer();
 //            timer.scheduleAtFixedRate(new TimerTask() {
 //                @Override

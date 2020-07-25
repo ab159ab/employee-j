@@ -4,6 +4,7 @@ package sample;
 import javax.websocket.*;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.*;
 import static javafx.application.Application.launch;
 
@@ -15,20 +16,21 @@ public class WebsocketClientEndpoint extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         this.session = session;
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+
+
             @Override
             public void onMessage(String message) {
+
                 System.out.println("Received: " + message);
                 if (!message.equals("404")){
                     main = new Main();
                     String image = main.captureScreens();
-                    if (image==image){
-
-                    }
                     String name =  Main.text;
                     Controller controller = new Controller(name,image);
                     String object = controller.toJson();
                     sendObject(object);
                 }
+
             }
         });
     }
