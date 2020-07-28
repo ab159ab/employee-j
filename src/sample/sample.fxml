@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <left>
+      <Button fx:id="btnLogin" mnemonicParsing="false" onAction="#loginAction" text="Login" BorderPane.alignment="CENTER" />
+   </left>
+   <right>
+      <Button fx:id="btnStop" mnemonicParsing="false" onAction="#stopAction" text="Stop" BorderPane.alignment="CENTER" />
+   </right>
+   <top>
+      <TextField fx:id="txtName" BorderPane.alignment="CENTER" />
+   </top>
+   <bottom>
+      <Label fx:id="lablStatus" text="Status:" BorderPane.alignment="CENTER" />
+   </bottom>
+</BorderPane>
