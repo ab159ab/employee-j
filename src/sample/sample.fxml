@@ -14,6 +14,6 @@
       <TextField fx:id="txtName" BorderPane.alignment="CENTER" />
    </top>
    <bottom>
-      <Label fx:id="lablStatus" text="Status:" BorderPane.alignment="CENTER" />
+      <Label fx:id="lablStatus" text="Show Status" BorderPane.alignment="CENTER" />
    </bottom>
 </BorderPane>

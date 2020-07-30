@@ -4,7 +4,6 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,7 +16,7 @@ public class MouseLog implements NativeMouseInputListener {
     static boolean SIGNAL2 = false;
     static WebsocketClientEndpoint handler;
 
-    public static void check(){
+    public void mouseCheck(){
         if (temp == 1){
             timer.cancel();
         }
@@ -26,24 +25,23 @@ public class MouseLog implements NativeMouseInputListener {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (count >= WebsocketClientEndpoint.num){
+                if (KeyLog.SIGNAL == true && KeyLog.SIGNAL2 == true){
                     timer.cancel();
+                }
+                if (count >= WebsocketClientEndpoint.num){
                     count = 0;
                     temp = 0;
                     SIGNAL = true;
                     if (KeyLog.SIGNAL == true && KeyLog.SIGNAL2 == false){
-                        String name =  Controller.name;
-                        Message message = new Message(name,"Disconnected");
-                        String objects = message.toJson();
-                    handler.sendObject(objects);
                     handler.cancel();
                     SIGNAL2 = true;
+                    timer.cancel();
                     }
                     System.out.println("Inactive Time Exceeded");
                 }
                 else {
                     count ++;
-                    System.out.println("Motion Counts: " + count);
+                    System.out.println("Mouse Counts: " + count);
                 }
             }
         },0,1000);
@@ -74,7 +72,6 @@ public class MouseLog implements NativeMouseInputListener {
     }
 
     public static void main(String[] args) {
-        check();
         try {
             GlobalScreen.registerNativeHook();
         }
@@ -83,8 +80,8 @@ public class MouseLog implements NativeMouseInputListener {
             System.err.println(ex.getMessage());
             System.exit(1);
         }
-        MouseLog example = new MouseLog();
-        GlobalScreen.addNativeMouseListener(example);
-        GlobalScreen.addNativeMouseMotionListener(example);
+        MouseLog mouseLog = new MouseLog();
+        GlobalScreen.addNativeMouseListener(mouseLog);
+        GlobalScreen.addNativeMouseMotionListener(mouseLog);
     }
 }

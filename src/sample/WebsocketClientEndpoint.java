@@ -1,9 +1,8 @@
 package sample;
 
-
+import com.google.gson.Gson;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
-
 import javax.websocket.*;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import java.io.IOException;
@@ -12,7 +11,7 @@ import static javafx.application.Application.launch;
 
 public class WebsocketClientEndpoint extends Endpoint {
     static Session session;
-    static int num = 10;
+    static int num = 0;
 
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
@@ -20,15 +19,25 @@ public class WebsocketClientEndpoint extends Endpoint {
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
 
             @Override
-            public void onMessage(String message) {
-                if (!message.equals("404")){
+            public void onMessage(String jsonMessage) {
+                Gson gson = new Gson();
+                IncommingMessage message = gson.fromJson(jsonMessage,IncommingMessage.class);
+                String imageStatus = message.getimageStatus();
+                String internalTime = message.getInternalTime();
+                System.out.println(internalTime);
+                int num2 = 0;
+               num2 = Integer.parseInt(internalTime);
+                if (imageStatus.equals(Config.IMAGE_STATUS)){
                     Main main = new Main();
                     String image = main.captureScreens();
-                    String name =  Main.text;
+                    String name =  Controller.name;
                     Message message1 = new Message(name,image);
                     String object = message1.toJson();
                     sendObject(object);
-                    num = getInternalTime(message);
+                }
+                if (num2 != num ){
+                    num = num2;
+                    checkActivity();
                 }
             }
         });
@@ -39,8 +48,7 @@ public class WebsocketClientEndpoint extends Endpoint {
         ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
                 .configurator(new Configurator())
                 .build();
-        container.connectToServer(this, config, new URI("ws://localhost:8080/echo"));
-        checkActivity();
+        container.connectToServer(this, config, new URI(Config.CONNECTION_STRING));
     }
 
     public WebsocketClientEndpoint() {
@@ -48,7 +56,6 @@ public class WebsocketClientEndpoint extends Endpoint {
     }
 
     public void checkActivity(){
-        KeyLog keyLog = new KeyLog();
         try {
             GlobalScreen.registerNativeHook();
         }
@@ -57,24 +64,22 @@ public class WebsocketClientEndpoint extends Endpoint {
             System.err.println(ex.getMessage());
             System.exit(1);
         }
+        KeyLog keyLog = new KeyLog();
         GlobalScreen.addNativeKeyListener(keyLog);
-        MouseLog log2 = new MouseLog();
-        GlobalScreen.addNativeMouseListener(log2);
-        GlobalScreen.addNativeMouseMotionListener(log2);
-        MouseLog.check();
+        keyLog.keyCheck();
+        MouseLog mouseLog = new MouseLog();
+        GlobalScreen.addNativeMouseListener(mouseLog);
+        GlobalScreen.addNativeMouseMotionListener(mouseLog);
+        mouseLog.mouseCheck();
     }
 
     public static void sendObject(String object) {
         session.getAsyncRemote().sendObject(object);
     }
 
-    public int getInternalTime(String string){
-        int iTime = Integer.parseInt(string);
-        return iTime;
-    }
-
     public static void cancel(){
         try{
+            System.out.println("Disconnected");
             session.close();
         }catch (Exception e){
             System.out.println(e);
