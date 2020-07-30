@@ -9,33 +9,32 @@ import java.util.TimerTask;
 
 public class MouseLog implements NativeMouseInputListener {
 
-    static int count = 0;
-    static int temp = 0;
+    static boolean REACHED_LIMIT = false;
+    static boolean CONNECTION_CANCELED = false;
+    static boolean oldTimer = false;
+    static int count = Config.INITIAL_VALUE;
     static Timer timer;
-    static boolean SIGNAL = false;
-    static boolean SIGNAL2 = false;
-    static WebsocketClientEndpoint handler;
 
     public void mouseCheck(){
-        if (temp == 1){
+        if (oldTimer){
             timer.cancel();
         }
         timer = new Timer();
-        temp = 1;
+        oldTimer = true;
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (KeyLog.SIGNAL == true && KeyLog.SIGNAL2 == true){
+                if (count >= WebsocketClientEndpoint.inactivityInterval && KeyLog.REACHED_LIMIT && KeyLog.CONNECTION_CANCELED){
                     timer.cancel();
                 }
-                if (count >= WebsocketClientEndpoint.num){
+                else if (count >= WebsocketClientEndpoint.inactivityInterval){
                     count = 0;
-                    temp = 0;
-                    SIGNAL = true;
-                    if (KeyLog.SIGNAL == true && KeyLog.SIGNAL2 == false){
-                    handler.cancel();
-                    SIGNAL2 = true;
-                    timer.cancel();
+                    oldTimer = false;
+                    REACHED_LIMIT = true;
+                    if (KeyLog.REACHED_LIMIT == true && KeyLog.CONNECTION_CANCELED == false){
+                        WebsocketClientEndpoint.cancel();
+                        CONNECTION_CANCELED = true;
+                        timer.cancel();
                     }
                     System.out.println("Inactive Time Exceeded");
                 }

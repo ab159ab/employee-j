@@ -10,8 +10,9 @@ import java.net.*;
 import static javafx.application.Application.launch;
 
 public class WebsocketClientEndpoint extends Endpoint {
+
     static Session session;
-    static int num = 0;
+    static int inactivityInterval = Config.INITIAL_VALUE;
 
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
@@ -24,9 +25,9 @@ public class WebsocketClientEndpoint extends Endpoint {
                 IncommingMessage message = gson.fromJson(jsonMessage,IncommingMessage.class);
                 String imageStatus = message.getimageStatus();
                 String internalTime = message.getInternalTime();
-                System.out.println(internalTime);
-                int num2 = 0;
-               num2 = Integer.parseInt(internalTime);
+                System.out.println("INTERNAL TIME:  " + internalTime);
+                int newInactivityInterval = Config.INITIAL_VALUE;
+                newInactivityInterval = Integer.parseInt(internalTime);
                 if (imageStatus.equals(Config.IMAGE_STATUS)){
                     Main main = new Main();
                     String image = main.captureScreens();
@@ -35,8 +36,8 @@ public class WebsocketClientEndpoint extends Endpoint {
                     String object = message1.toJson();
                     sendObject(object);
                 }
-                if (num2 != num ){
-                    num = num2;
+                if (newInactivityInterval != inactivityInterval ){
+                    inactivityInterval = newInactivityInterval;
                     checkActivity();
                 }
             }
