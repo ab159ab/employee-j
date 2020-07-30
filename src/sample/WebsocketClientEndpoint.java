@@ -5,6 +5,7 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import javax.websocket.*;
 import javax.websocket.ClientEndpointConfig.Configurator;
+import java.awt.*;
 import java.io.IOException;
 import java.net.*;
 import static javafx.application.Application.launch;
@@ -13,6 +14,7 @@ public class WebsocketClientEndpoint extends Endpoint {
 
     static Session session;
     static int inactivityInterval = Config.INITIAL_VALUE;
+    static String STATUS ;
 
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
@@ -21,6 +23,7 @@ public class WebsocketClientEndpoint extends Endpoint {
 
             @Override
             public void onMessage(String jsonMessage) {
+                STATUS = Config.LOGIN;
                 Gson gson = new Gson();
                 IncommingMessage message = gson.fromJson(jsonMessage,IncommingMessage.class);
                 String imageStatus = message.getimageStatus();
@@ -79,6 +82,8 @@ public class WebsocketClientEndpoint extends Endpoint {
     }
 
     public static void cancel(){
+        javafx.scene.control.Label label = new javafx.scene.control.Label("Disconnectd");
+        STATUS = Config.LOGOUT;
         try{
             System.out.println("Disconnected");
             session.close();

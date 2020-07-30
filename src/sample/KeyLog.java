@@ -24,42 +24,40 @@ public class KeyLog implements NativeKeyListener {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (count <= WebsocketClientEndpoint.inactivityInterval && MouseLog.REACHED_LIMIT && MouseLog.CONNECTION_CANCELED){
-                    timer.cancel();
-                }
-                else if (count >= WebsocketClientEndpoint.inactivityInterval){
-                        count = 0;
-                    oldTimer = false;
-                    REACHED_LIMIT = true;
-                    if (MouseLog.REACHED_LIMIT == true && MouseLog.CONNECTION_CANCELED == false){
-                        CONNECTION_CANCELED = true;
-                        timer.cancel();
-                        WebsocketClientEndpoint.cancel();
-                    }
-                    System.out.println("Inactive Time Exceeded");
-                }
-                else {
-                    count ++;
-                    System.out.println("Key Counts: " + count);
-                }
+             keyTask();
             }
         },0,1000);
     }
 
     public void nativeKeyPressed(NativeKeyEvent e) {
-        System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
         if(count != 0){
-            System.out.println("Count Reset");
             count = 0;
         }
     }
 
     public void nativeKeyReleased(NativeKeyEvent e) {
-        System.out.println("Key Released: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
     }
 
     public void nativeKeyTyped(NativeKeyEvent e) {
-        System.out.println("Key Typed: " + e.getKeyText(e.getKeyCode()));
+    }
+
+    public void keyTask(){
+        if (count <= WebsocketClientEndpoint.inactivityInterval && MouseLog.REACHED_LIMIT && MouseLog.CONNECTION_CANCELED){
+            timer.cancel();
+        }
+        else if (count >= WebsocketClientEndpoint.inactivityInterval){
+            count = 0;
+            oldTimer = false;
+            REACHED_LIMIT = true;
+            if (MouseLog.REACHED_LIMIT && !MouseLog.CONNECTION_CANCELED){
+                CONNECTION_CANCELED = true;
+                timer.cancel();
+                WebsocketClientEndpoint.cancel();
+            }
+        }
+        else {
+            count ++;
+        }
     }
 
     public static void main(String[] args) {

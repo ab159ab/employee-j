@@ -5,6 +5,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -16,6 +17,7 @@ public class Controller implements Initializable {
     public Label lablStatus;
     static Main main;
     static String name;
+    public BorderPane borderPane;
 
     @FXML
     public void loginAction(){
@@ -31,15 +33,11 @@ public class Controller implements Initializable {
     public void stopAction(){
         btnLogin.setDisable(false);
         WebsocketClientEndpoint.cancel();
-        lablStatus.setText("Disconnected");
-    }
-
-    public void setLabel(String status){
-        lablStatus.setText(status);
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         btnStop.setDisable(true);
+
     }
 }
