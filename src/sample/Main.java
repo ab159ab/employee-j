@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -18,6 +19,7 @@ public class Main extends Application {
     static String image;
     static WebsocketClientEndpoint handler = new WebsocketClientEndpoint();
     BorderPane layout;
+    Controller controller;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -25,10 +27,16 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(Main.class.getResource("sample.fxml"));
         layout = loader.load();
+        controller = loader.getController();
         Scene scene = new Scene(layout);
         primaryStage.setTitle("Java Client");
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setOnCloseRequest(event->{
+            controller.dispose();
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     public String captureScreens() {

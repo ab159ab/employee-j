@@ -13,15 +13,15 @@ public class KeyLog implements NativeKeyListener {
     static boolean CONNECTION_CANCELED = false;
     static boolean oldTimer = false;
     static int count = Config.INITIAL_VALUE;
-    static Timer timer;
+    static Timer keyTimer;
 
     public void keyCheck(){
         if (oldTimer){
-            timer.cancel();
+            keyTimer.cancel();
         }
-        timer = new Timer();
+        keyTimer = new Timer();
         oldTimer = true;
-        timer.scheduleAtFixedRate(new TimerTask() {
+        keyTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
              keyTask();
@@ -41,22 +41,25 @@ public class KeyLog implements NativeKeyListener {
     public void nativeKeyTyped(NativeKeyEvent e) {
     }
 
-    public void keyTask(){
-        if (count <= WebsocketClientEndpoint.inactivityInterval && MouseLog.REACHED_LIMIT && MouseLog.CONNECTION_CANCELED){
-            timer.cancel();
+    public static void keyTask(){
+        if (MouseLog.CONNECTION_CANCELED){
+            keyTimer.cancel();
         }
-        else if (count >= WebsocketClientEndpoint.inactivityInterval){
+         if (count >= WebsocketClientEndpoint.inactivityInterval){
             count = 0;
-            oldTimer = false;
+            oldTimer = true;
             REACHED_LIMIT = true;
-            if (MouseLog.REACHED_LIMIT && !MouseLog.CONNECTION_CANCELED){
-                CONNECTION_CANCELED = true;
-                timer.cancel();
+            if (MouseLog.REACHED_LIMIT){
+                KeyLog.CONNECTION_CANCELED = true;
+                REACHED_LIMIT = false;
+                keyTimer.cancel();
+                MouseLog.mouseTimer.cancel();
                 WebsocketClientEndpoint.cancel();
             }
         }
         else {
             count ++;
+            System.out.println("Key Counts: " + count);
         }
     }
 

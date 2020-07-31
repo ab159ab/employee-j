@@ -13,15 +13,15 @@ public class MouseLog implements NativeMouseInputListener {
     static boolean CONNECTION_CANCELED = false;
     static boolean oldTimer = false;
     static int count = Config.INITIAL_VALUE;
-    static Timer timer;
+    static Timer mouseTimer;
 
     public void mouseCheck(){
         if (oldTimer){
-            timer.cancel();
+            mouseTimer.cancel();
         }
-        timer = new Timer();
+        mouseTimer = new Timer();
         oldTimer = true;
-        timer.scheduleAtFixedRate(new TimerTask() {
+        mouseTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
              mouseTask();
@@ -47,22 +47,25 @@ public class MouseLog implements NativeMouseInputListener {
     public void nativeMouseDragged(NativeMouseEvent e) {
     }
 
-    public void mouseTask(){
-        if (count >= WebsocketClientEndpoint.inactivityInterval && KeyLog.REACHED_LIMIT && KeyLog.CONNECTION_CANCELED){
-            timer.cancel();
+    public static void mouseTask(){
+        if (KeyLog.CONNECTION_CANCELED){
+            mouseTimer.cancel();
         }
-        else if (count >= WebsocketClientEndpoint.inactivityInterval){
+         if (count >= WebsocketClientEndpoint.inactivityInterval){
             count = 0;
-            oldTimer = false;
+            oldTimer = true;
             REACHED_LIMIT = true;
-            if (KeyLog.REACHED_LIMIT && !KeyLog.CONNECTION_CANCELED){
+            if (KeyLog.REACHED_LIMIT ){
+                MouseLog.CONNECTION_CANCELED = true;
+                REACHED_LIMIT = false;
+                mouseTimer.cancel();
+                KeyLog.keyTimer.cancel();
                 WebsocketClientEndpoint.cancel();
-                CONNECTION_CANCELED = true;
-                timer.cancel();
             }
         }
         else {
             count ++;
+            System.out.println("Mouse Counts: " + count);
         }
     }
 

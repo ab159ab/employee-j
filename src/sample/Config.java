@@ -5,5 +5,7 @@ public class Config {
     public static String IMAGE_STATUS = "send";
     public static int INITIAL_VALUE = 0;
     public static String LOGIN = "CONNECTED";
-    public static String LOGOUT = "DISCONNECTED";
+    public static String LOGOUT = "You Are Logged Out";
+    public static String EMPTY = "EMPTY";
+    public static String DISCONNECTED = "DISCONNECTED";
 }

@@ -5,25 +5,30 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import javax.websocket.*;
 import javax.websocket.ClientEndpointConfig.Configurator;
-import java.awt.*;
 import java.io.IOException;
 import java.net.*;
+
 import static javafx.application.Application.launch;
 
 public class WebsocketClientEndpoint extends Endpoint {
 
+    public static String CONNECTION_STATUS = Config.EMPTY;
     static Session session;
     static int inactivityInterval = Config.INITIAL_VALUE;
-    static String STATUS ;
 
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+        CONNECTION_STATUS = Config.LOGIN;
         this.session = session;
+        try {
+            GlobalScreen.registerNativeHook();
+        } catch (NativeHookException e) {
+            e.printStackTrace();
+        }
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
 
             @Override
             public void onMessage(String jsonMessage) {
-                STATUS = Config.LOGIN;
                 Gson gson = new Gson();
                 IncommingMessage message = gson.fromJson(jsonMessage,IncommingMessage.class);
                 String imageStatus = message.getimageStatus();
@@ -43,9 +48,25 @@ public class WebsocketClientEndpoint extends Endpoint {
                     inactivityInterval = newInactivityInterval;
                     checkActivity();
                 }
+                else {
+                    checkActivity();
+                }
             }
         });
     }
+
+    @Override
+    public void onClose(Session session, CloseReason closeReason) {
+        super.onClose(session, closeReason);
+        CONNECTION_STATUS = Config.LOGOUT;
+        System.out.println("Closed");
+        try {
+            GlobalScreen.unregisterNativeHook();
+        } catch (NativeHookException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void connect() throws DeploymentException, IOException, URISyntaxException {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -60,14 +81,6 @@ public class WebsocketClientEndpoint extends Endpoint {
     }
 
     public void checkActivity(){
-        try {
-            GlobalScreen.registerNativeHook();
-        }
-        catch (NativeHookException ex) {
-            System.err.println("There was a problem.");
-            System.err.println(ex.getMessage());
-            System.exit(1);
-        }
         KeyLog keyLog = new KeyLog();
         GlobalScreen.addNativeKeyListener(keyLog);
         keyLog.keyCheck();
@@ -77,13 +90,11 @@ public class WebsocketClientEndpoint extends Endpoint {
         mouseLog.mouseCheck();
     }
 
-    public static void sendObject(String object) {
+    public void sendObject(String object) {
         session.getAsyncRemote().sendObject(object);
     }
 
     public static void cancel(){
-        javafx.scene.control.Label label = new javafx.scene.control.Label("Disconnectd");
-        STATUS = Config.LOGOUT;
         try{
             System.out.println("Disconnected");
             session.close();
