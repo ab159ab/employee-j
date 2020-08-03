@@ -1,22 +1,24 @@
 package sample;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class Message {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
     String name;
     String image;
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public Message(String string1, String string2){
-        this.name = string1;
-        this.image = string2;
+    public Message(String name, String image){
+        this.name = name;
+        this.image = image;
     }
 
-    public String getString1() {
+    public String getName() {
         return name;
     }
 
-    public String getString2() {
+    public String getImage() {
         return image;
     }
 

@@ -2,8 +2,9 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <left>
       <Button fx:id="btnLogin" mnemonicParsing="false" onAction="#loginAction" text="Login" BorderPane.alignment="CENTER" />
    </left>
@@ -14,6 +15,9 @@
       <TextField fx:id="txtName" BorderPane.alignment="CENTER" />
    </top>
    <bottom>
-      <Label fx:id="lablStatus" text="Status:" BorderPane.alignment="CENTER" />
+      <Label fx:id="lablStatus" BorderPane.alignment="CENTER">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font></Label>
    </bottom>
 </BorderPane>

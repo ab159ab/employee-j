@@ -1,38 +1,42 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.Timer;
 
 public class Main extends Application {
 
-    static String text = "A";
     static BufferedImage screenFullImage;
     static String image;
-    private static int inactivityTime = 60;
+    static WebsocketClientEndpoint handler = new WebsocketClientEndpoint();
     BorderPane layout;
-    WebsocketClientEndpoint handler = new WebsocketClientEndpoint();
+    Controller controller;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(Main.class.getResource("sample.fxml"));
         layout = loader.load();
+        controller = loader.getController();
         Scene scene = new Scene(layout);
         primaryStage.setTitle("Java Client");
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setOnCloseRequest(event->{
+            controller.dispose();
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     public String captureScreens() {
@@ -53,7 +57,7 @@ public class Main extends Application {
         return image;
     }
 
-    public void connection(String name) {
+    public static void connection(String name) {
         try {
             handler.connect();
             Message message = new Message(name, "image");

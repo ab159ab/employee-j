@@ -4,77 +4,72 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MouseLog implements NativeMouseInputListener {
 
-    static int count = 0;
-    static int temp = 0;
-    static Timer timer;
-    static boolean SIGNAL = false;
-    static boolean SIGNAL2 = false;
-    static WebsocketClientEndpoint handler;
+    static boolean REACHED_LIMIT = false;
+    static boolean CONNECTION_CANCELED = false;
+    static boolean oldTimer = false;
+    static int count = Config.INITIAL_VALUE;
+    static Timer mouseTimer;
 
-    public static void check(){
-        if (temp == 1){
-            timer.cancel();
+    public void mouseCheck(){
+        if (oldTimer){
+            mouseTimer.cancel();
         }
-        timer = new Timer();
-        temp = 1;
-        timer.scheduleAtFixedRate(new TimerTask() {
+        mouseTimer = new Timer();
+        oldTimer = true;
+        mouseTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (count >= WebsocketClientEndpoint.num){
-                    timer.cancel();
-                    count = 0;
-                    temp = 0;
-                    SIGNAL = true;
-                    if (KeyLog.SIGNAL == true && KeyLog.SIGNAL2 == false){
-                        String name =  Controller.name;
-                        Message message = new Message(name,"Disconnected");
-                        String objects = message.toJson();
-                    handler.sendObject(objects);
-                    handler.cancel();
-                    SIGNAL2 = true;
-                    }
-                    System.out.println("Inactive Time Exceeded");
-                }
-                else {
-                    count ++;
-                    System.out.println("Motion Counts: " + count);
-                }
+             mouseTask();
             }
         },0,1000);
     }
 
     public void nativeMouseClicked(NativeMouseEvent e) {
-        System.out.println("Mouse Clicked: " + e.getClickCount());
     }
 
     public void nativeMousePressed(NativeMouseEvent e) {
-        System.out.println("Mouse Pressed: " + e.getButton());
     }
 
     public void nativeMouseReleased(NativeMouseEvent e) {
-        System.out.println("Mouse Released: " + e.getButton());
     }
 
     public void nativeMouseMoved(NativeMouseEvent e) {
-        System.out.println("Mouse Moved: " + e.getX() + ", " + e.getY());
         if(count != 0){
-            System.out.println("Count Reset");
             count = 0;
         }
     }
 
     public void nativeMouseDragged(NativeMouseEvent e) {
-        System.out.println("Mouse Dragged: " + e.getX() + ", " + e.getY());
+    }
+
+    public static void mouseTask(){
+        if (KeyLog.CONNECTION_CANCELED){
+            mouseTimer.cancel();
+        }
+         if (count >= WebsocketClientEndpoint.inactivityInterval){
+            count = 0;
+            oldTimer = true;
+            REACHED_LIMIT = true;
+            if (KeyLog.REACHED_LIMIT ){
+                MouseLog.CONNECTION_CANCELED = true;
+                REACHED_LIMIT = false;
+                mouseTimer.cancel();
+                KeyLog.keyTimer.cancel();
+                WebsocketClientEndpoint.cancel();
+            }
+        }
+        else {
+            count ++;
+            System.out.println("Mouse Counts: " + count);
+        }
     }
 
     public static void main(String[] args) {
-        check();
         try {
             GlobalScreen.registerNativeHook();
         }
@@ -83,8 +78,8 @@ public class MouseLog implements NativeMouseInputListener {
             System.err.println(ex.getMessage());
             System.exit(1);
         }
-        MouseLog example = new MouseLog();
-        GlobalScreen.addNativeMouseListener(example);
-        GlobalScreen.addNativeMouseMotionListener(example);
+        MouseLog mouseLog = new MouseLog();
+        GlobalScreen.addNativeMouseListener(mouseLog);
+        GlobalScreen.addNativeMouseMotionListener(mouseLog);
     }
 }
